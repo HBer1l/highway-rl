@@ -18,7 +18,7 @@
 
 > **Course:** CMP4501 – Applied Reinforcement Learning
 > **Track:** Option A · Autonomous Driving with Highway-Env
-> **Author:** <!-- TODO: Your Name --> · <!-- TODO: Student ID -->
+> **Author:** Hatice Beril Satıcı · 2201844
 
 </div>
 
@@ -140,7 +140,15 @@ PPO was chosen over DQN for three reasons:
 
 | Hyperparameter | Value | Rationale |
 |---|---|---|
-| Learning rate | $5 \times 10^{-4}$ | SB3 default for MLP policies; stable across reward versions |
+The figure above shows the V3a training curve (V3c is V3a's TTC-augmented sibling and follows a similar trajectory). Three observations stand out:
+
+- **Rapid early improvement (0 – 25k steps).** Smoothed reward jumps from 0 to ~22 within the first 25,000 steps. The agent quickly discovers that braking on the merge ramp avoids most early collisions, and the right-lane bonus from V3a's $\gamma \cdot \ell_t$ term reinforces a coherent default behavior.
+- **Long plateau at ~22 – 23 (25k – 200k).** The smoothed reward never substantially exceeds the level reached around 25k steps. This is consistent with the multi-seed evaluation finding that V3a converges to a degenerate aggressive-merge strategy across most initializations — the policy is "good enough" by V3a's reward definition without ever learning to drive safely. Raw episode rewards range from ~10 to ~34, indicating high outcome variance.
+- **A pronounced reward dip near step 150k.** Smoothed reward briefly drops from ~25 to ~15 before recovering. PPO is known to occasionally suffer from large policy updates after periods of low entropy; the recovery within ~10k steps suggests the trust-region clipping and value function were able to stabilize the policy without external intervention.
+
+The `halftrained` checkpoint at step 50,000 is taken once the policy has already plateaued, making it a representative "competent but unsafe" snapshot — perfect for the evolution video where we want a clear behavioral gap between the half-trained and fully-trained agents.
+
+Final V3c training metrics (from `logs/v3_ttc/`): `ep_rew_mean = 13.8`, `ep_len_mean = 57.2`, `explained_variance = 0.964`. The high explained variance indicates PPO's value function successfully fits the dense TTC signal — the strongest in-training evidence that V3c's reward shape is well-formed.| Learning rate | $5 \times 10^{-4}$ | SB3 default for MLP policies; stable across reward versions |
 | $n_{\text{steps}}$ (rollout) | 512 | $4 \times 512 = 2048$ samples per update with 4 parallel envs |
 | Batch size | 64 | Standard PPO default |
 | Epochs per update | 10 | More gives diminishing returns on this task |
@@ -181,7 +189,7 @@ Low-level steering and throttle are handled by highway-env's PID controllers —
 
 ---
 
-## 📊 Training Analysis
+## Training Analysis
 
 <p align="center">
   <img src="assets/reward_curve.png" alt="Episode reward over training steps for the final V3 agent" width="80%"/>
@@ -189,16 +197,40 @@ Low-level steering and throttle are handled by highway-env's PID controllers —
 
 **What you should see when running this yourself:**
 
-<!--
-TODO: After your real training run, replace these bullets with what *actually* happened
-in your curve. Do NOT edit them to match a fake narrative — graders are reading for
-honesty and analysis, not a perfect-looking plot.
--->
+The figure above shows the V3a training curve (V3c is V3a's TTC-augmented sibling and follows a similar trajectory). Three observations stand out:
 
-- **Steps 0 – 20k.** <!-- TODO: e.g. "Reward hovers near zero. The policy is essentially random and most episodes terminate early in collisions." -->
-- **Steps 20k – 50k.** <!-- TODO: e.g. "Sharp rise as the agent learns to brake on the merge ramp instead of accelerating into traffic. Variance is high — the policy still occasionally drives off-road." -->
-- **Steps 50k – 120k.** <!-- TODO: e.g. "Steady improvement; the agent begins consistently choosing FASTER once it's clear of the merge. A brief plateau around step 90k corresponds to the policy switching from a 'wait forever' strategy to a 'find a gap' strategy." -->
-- **Steps 120k – 200k.** <!-- TODO: e.g. "Convergence. Smoothed reward stabilizes around X with low variance, and crash rate (measured at evaluation time) drops below Y%." -->
+- **Rapid early improvement (0 – 25k steps).** Smoothed 
+reward jumps from 0 to ~22 within the first 25,000 steps. 
+The agent quickly discovers that braking on the merge ramp 
+avoids most early collisions, and the right-lane bonus from 
+V3a's $\gamma \cdot \ell_t$ term reinforces a coherent 
+default behavior. - **Long plateau at ~22 – 23 (25k – 
+200k).** The smoothed reward never substantially exceeds the 
+level reached around 25k steps. This is consistent with the 
+multi-seed evaluation finding that V3a converges to a 
+degenerate aggressive-merge strategy across most 
+initializations — the policy is "good enough" by V3a's 
+reward definition without ever learning to drive safely. Raw 
+episode rewards range from ~10 to ~34, indicating high 
+outcome variance. - **A pronounced reward dip near step 
+150k.** Smoothed reward briefly drops from ~25 to ~15 before 
+recovering. PPO is known to occasionally suffer from large 
+policy updates after periods of low entropy; the recovery 
+within ~10k steps suggests the trust-region clipping and 
+value function were able to stabilize the policy without 
+external intervention.
+
+The `halftrained` checkpoint at step 50,000 is taken once the policy has already plateaued, making it a representative "competent but unsafe" snapshot — perfect for the evolution video where we want a clear behavioral gap between the half-trained and fully-trained agents.The figure above shows the V3a training curve (V3c is V3a's TTC-augmented sibling and follows a similar trajectory). Three observations stand out:
+
+- **Rapid early improvement (0 – 25k steps).** Smoothed reward jumps from 0 to ~22 within the first 25,000 steps. The agent quickly discovers that braking on the merge ramp avoids most early collisions, and the right-lane bonus from V3a's $\gamma \cdot \ell_t$ term reinforces a coherent default behavior.
+- **Long plateau at ~22 – 23 (25k – 200k).** The smoothed reward never substantially exceeds the level reached around 25k steps. This is consistent with the multi-seed evaluation finding that V3a converges to a degenerate aggressive-merge strategy across most initializations — the policy is "good enough" by V3a's reward definition without ever learning to drive safely. Raw episode rewards range from ~10 to ~34, indicating high outcome variance.
+- **A pronounced reward dip near step 150k.** Smoothed reward briefly drops from ~25 to ~15 before recovering. PPO is known to occasionally suffer from large policy updates after periods of low entropy; the recovery within ~10k steps suggests the trust-region clipping and value function were able to stabilize the policy without external intervention.
+
+The `halftrained` checkpoint at step 50,000 is taken once the policy has already plateaued, making it a representative "competent but unsafe" snapshot — perfect for the evolution video where we want a clear behavioral gap between the half-trained and fully-trained agents.
+
+Final V3c training metrics (from `logs/v3_ttc/`): `ep_rew_mean = 13.8`, `ep_len_mean = 57.2`, `explained_variance = 0.964`. The high explained variance indicates PPO's value function successfully fits the dense TTC signal — the strongest in-training evidence that V3c's reward shape is well-formed.
+
+Final V3c training metrics (from `logs/v3_ttc/`): `ep_rew_mean = 13.8`, `ep_len_mean = 57.2`, `explained_variance = 0.964`. The high explained variance indicates PPO's value function successfully fits the dense TTC signal — the strongest in-training evidence that V3c's reward shape is well-formed.
 
 ### Final agent performance
 
@@ -221,7 +253,7 @@ V1 reaches a higher *raw* reward simply because its definition is easier to sati
 
 ---
 
-## 🔧 Challenges and Failures
+## Challenges and Failures
 
 This section documents what went wrong on the way to V3 — graders explicitly asked for honest failure analysis, and these failures shaped every subsequent design decision.
 
@@ -249,7 +281,7 @@ Early in development the training script crashed with `TypeError: reset() got an
 
 ---
 
-## 🔁 Reproducibility
+## Reproducibility
 
 All randomness flows from the seed in `PPOConfig.seed` (default `42`). To reproduce the submitted run from scratch:
 
