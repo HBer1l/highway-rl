@@ -39,7 +39,6 @@ A PPO agent was trained on `highway-env/merge-v0` under four reward formulations
 - [Training Analysis](#-training-analysis)
 - [Multi-Seed Evaluation](#-multi-seed-evaluation)
 - [Behavioral Analysis](#-behavioral-analysis)
-- [Statistical Significance](#-statistical-significance)
 - [Challenges and Failures](#-challenges-and-failures)
 - [Limitations and Future Work](#-limitations-and-future-work)
 - [Reproducibility](#-reproducibility)
@@ -236,28 +235,6 @@ The four panels reveal a coherent qualitative difference between the two policie
 - **Action distribution (bottom-right).** V3a uses `FASTER` 42% of the time and never uses `IDLE` or `SLOWER` (0% each). V3c distributes its actions across all five options: `IDLE` 9%, `SLOWER` 15%, `FASTER` only 10%, and a dominant 50% on `LANE_RIGHT`. Quantitatively, V3a is a hyper-reactive throttle-mashing policy; V3c is a policy that balances speed against safety using the full discrete action set.
 
 Taken together, these four views support a single interpretation: the dense TTC penalty taught the agent to *modulate behavior based on context* (slow down when close to traffic, speed up when clear, retreat to a safer lane after merging) rather than executing a single fixed strategy. This is the qualitative payoff of replacing a sparse terminal collision signal with a dense temporal one.
-
-## Statistical Significance
-
-<details>
-<summary><strong> OVERKILL FOR UNDERGRAD COURSEWORK - CLICK TO EXPAND</strong></summary>
-
-> This section applies inferential statistics to a 3-seed RL experiment, which is at the lower bound of where these tests have any power. With n=3 per group, a non-significant result tells us essentially nothing; a significant result is suggestive but not definitive. Included for methodological completeness.
-
-Welch's two-sample t-test (unequal variances) and one-sided Mann-Whitney U test on the crash rates and returns:
-
-**Crash rate** ($H_0$: V3a and V3c have equal crash rate, $H_1$: V3a > V3c):
-- Welch's t: $t = 4.460$, $p = 0.024$
-- Mann-Whitney U: $U = 9.0$, $p = 0.038$
-
-Both tests reject the null at $\alpha = 0.05$. The fact that significance was achieved with n=3 indicates the underlying effect size is large enough to overcome the test's low power.
-
-**Mean return** ($H_0$: equal returns):
-- Welch's t: $t = 8.300$, $p = 0.013$
-
-V3c has *lower* mean return than V3a. This is expected and not a defect of V3c - the TTC penalty term $-\zeta \cdot \text{TTC}_{\text{pen}}$ is by construction subtracted on every risky step, so V3c's reward is structurally lower-bounded relative to V3a even when both policies behave identically. **Returns across reward functions are not comparable.** What matters is task performance, measured by crash rate.
-
-</details>
 
 ## Challenges and Failures
 
