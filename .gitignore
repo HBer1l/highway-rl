@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Training artifacts (keep only final checkpoints in repo)
+logs/*/events.out.tfevents.*
+logs/**/*.csv
+*.pkl
+*.npz
+
+# Large intermediate checkpoints (keep only the 3 named ones)
+checkpoints/*_step_*.zip
+checkpoints/best_model/
+
+# Videos directory: keep evolution.gif in assets/, scratch videos here are temp
+videos/*.mp4
+videos/*.gif
+!videos/.gitkeep
+
+# OS
+Thumbs.db
