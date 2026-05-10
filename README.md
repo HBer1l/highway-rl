@@ -296,14 +296,14 @@ if hasattr(highway_env, "register_highway_envs"):
 
 ## Limitations and Future Work
 
-**Limitations.**
+**Limitations**
 
 - **n=3 seeds is the lower bound.** Standard ML practice is 5-10 seeds. The statistical tests in this report would be substantially more powerful at n=5; a follow-up should add seeds 0 and 314.
 - **22% crash rate is not safe.** This is a research demo, not a deployable system. A production AV needs crash rates several orders of magnitude lower, achievable only with constrained-RL methods (CPO, Lagrangian PPO), formal safety specifications (RSS, ISO 26262), or model-based safe RL.
 - **Single environment.** Only `merge-v0` was studied. Generalization to `highway-fast-v0`, `roundabout-v0`, etc. was not evaluated.
 - **TTC simplification.** The TTC computation considers only the leading vehicle's longitudinal closing speed; lateral collisions during lane change are not modeled in the dense signal. A more complete formulation would compute TTC per neighboring vehicle and take the minimum.
 
-**Future work.**
+**Future work**
 
 - **Constrained-RL baseline.** Replace the soft TTC penalty with a hard CMDP constraint (CPO or Lagrangian PPO), which has theoretical guarantees the soft-penalty approach lacks.
 - **Curriculum learning.** Train sequentially on increasing traffic density to give the agent stable learning signal in the early phase.
