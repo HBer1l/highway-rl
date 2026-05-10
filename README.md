@@ -10,6 +10,7 @@
 
 **A study in iterative reward design on `highway-env/merge-v0`**
 
+[![CI](https://github.com/HBer1l/highway-rl/actions/workflows/ci.yml/badge.svg)](https://github.com/HBer1l/highway-rl/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.1+-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![Stable-Baselines3](https://img.shields.io/badge/SB3-2.3-green)](https://stable-baselines3.readthedocs.io/)

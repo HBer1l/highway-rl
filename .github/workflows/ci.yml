@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verify all source files parse
+        run: |
+          python -c "
+          import ast, sys
+          from pathlib import Path
+          errors = []
+          for f in Path('src').glob('*.py'):
+              try:
+                  ast.parse(f.read_text())
+              except SyntaxError as e:
+                  errors.append(f'{f}: {e}')
+          if errors:
+              for e in errors: print(e)
+              sys.exit(1)
+          print('All source files parse cleanly.')
+          "
+
+      - name: Smoke test - environment construction
+        run: |
+          python -c "
+          from src.env_wrapper import make_env
+          from src.config import CONFIG, RewardVersion
+          for v in RewardVersion:
+              env = make_env(CONFIG.env, v)
+              obs, info = env.reset(seed=0)
+              assert obs.shape == (5, 5), f'unexpected obs shape: {obs.shape}'
+              for _ in range(10):
+                  result = env.step(env.action_space.sample())
+                  assert len(result) == 5, f'expected 5-tuple, got {len(result)}'
+              env.close()
+              print(f'OK reward version: {v.value}')
+          "
+
+      - name: Smoke test - reward weights for every version
+        run: |
+          python -c "
+          from src.config import RewardVersion, RewardWeights
+          for v in RewardVersion:
+              w = RewardWeights.for_version(v)
+              assert w.alpha_speed >= 0, f'{v}: negative alpha'
+              assert w.beta_collision >= 0, f'{v}: negative beta'
+              print(f'OK weights for {v.value}: {w}')
+          "
+
+      - name: Verify line lengths (PEP8 soft check)
+        run: |
+          long_lines=$(awk 'length > 100 {print FILENAME":"NR" ("length" chars)"}' src/*.py)
+          if [ -n "$long_lines" ]; then
+              echo "Lines exceeding 100 chars:"
+              echo "$long_lines"
+              exit 1
+          fi
+          echo "All source lines <= 100 chars."
