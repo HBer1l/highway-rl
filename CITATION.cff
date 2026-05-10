@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "Merge-RL: Iterative Reward Design for Autonomous Merging on highway-env"
+abstract: >-
+  A study in reward shaping for autonomous merging in dense traffic, comparing
+  sparse collision-only rewards against a dense time-to-collision (TTC) based
+  safety signal. Multi-seed evaluation (n=3) demonstrates a 58% relative
+  reduction in crash rate (Welch's t-test, p=0.024) and tighter cross-seed
+  variance for the TTC variant. Includes documentation of six failure modes
+  encountered during development, including a single-seed result that
+  overstated the baseline by 26 percentage points.
+type: software
+authors:
+  - family-names: "SATICI"
+    given-names: "<HATICE BERIL>"
+    affiliation: "<Bahçeşehir University>"
+keywords:
+  - reinforcement-learning
+  - ppo
+  - autonomous-driving
+  - reward-shaping
+  - time-to-collision
+  - highway-env
+  - stable-baselines3
+license: MIT
+date-released: 2026-05-10
+version: "1.0.0"
+url: "https://github.com/HBer1l/highway-rl"
